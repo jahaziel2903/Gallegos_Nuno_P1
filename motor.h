@@ -7,32 +7,18 @@
 
 #ifndef MOTOR_H_
 #define MOTOR_H_
-
+#define JAZ_ON
 
 #include "stdint.h"
-#include "NVIC.h"
-#include "GPIO.h"
 #include "MK64F12.h"
 #include "Bits.h"
-#include "PIT.h"
 
+#define PORT_MOTOR	GPIO_C
+#define PIN_MOTOR	bit_17
+void MOTOR_init(void);
 
+void MOTOR_on(void);
 
-void Motor_on(uint8_t g_flag_motor, uint32_t sw2_value);
-
-
-
-void Motor_one_second(void);
-void Motor_three_second(void);
-void Motor_four_second(void);
-
-
-void Motor_off_one_second(void);
-void Motor_off_three_second(void);
-void Motor_off_four_second(void);
-
-
-void Motor_off(void);
-
+void MOTOR_off(void);
 
 #endif /* MOTOR_H_ */

@@ -1,117 +1,28 @@
-/*
- * GPIO.c
- *
- *  Created on: 22 feb. 2020
- *      Author: usuario
+/**
+	\file
+	\brief
+		This is the source file for the GPIO device driver for Kinetis K64.
+		It contains all the implementation for configuration functions and runtime functions.
+		i.e., this is the application programming interface (API) for the GPIO peripheral.
+	\author J. Luis Pizano Escalante, luispizano@iteso.mx
+	\date	19/02/2019
+	\todo
+	    Interrupts are not implemented in this API implementation.
  */
-
-
 #include "MK64F12.h"
 #include "GPIO.h"
 #include "Bits.h"
 
 
-
-uint8_t g_flag_port_C = FALSE;
-uint8_t g_flag_port_A = FALSE;
-
-uint8_t g_flag_port_D = FALSE;
-
-
-/*Pointers to function (callbacks)**/
-static void (*gpio_C_callback)(void) = 0;
+/*CALLBACKS ptr*/
 static void (*gpio_A_callback)(void) = 0;
-
+static void (*gpio_B_callback)(void) = 0;
+static void (*gpio_C_callback)(void) = 0;
 static void (*gpio_D_callback)(void) = 0;
+static void (*gpio_E_callback)(void) = 0;
 
 
 static gpio_interrupt_flags_t g_intr_status_flag = {0};
-
-
-void GPIO_callback_init(gpio_port_name_t port_name,void (*handler)(void))
-{
-	/*If there is a callback im GPIOA, me make a callback to handler**/
-	if(GPIO_A == port_name)
-	{
-		gpio_A_callback = handler;
-	}
-	else if(GPIO_C == port_name) /*GPIOC makes callback to handler**/
-	{
-		gpio_C_callback = handler;
-	}
-	else
-		gpio_D_callback = handler;
-}
-
-
-void PORTC_IRQHandler(void)
-{
-	/*Makes callback**/
-	printf("Entro");
-	if(gpio_C_callback)
-		gpio_C_callback();
-	/*There is an interrupt**/
-	g_flag_port_C = TRUE;
-	/*Cleans interrupt**/
-	GPIO_clear_interrupt(GPIO_C);
-
-}
-
-void PORTD_IRQHandler(void)
-{
-	/*Makes callback**/
-	printf("Entro");
-	if(gpio_D_callback)
-		gpio_D_callback();
-	/*There is an interrupt**/
-	g_flag_port_D = TRUE;
-	/*Cleans interrupt**/
-	GPIO_clear_interrupt(GPIO_D);
-
-}
-void PORTA_IRQHandler(void)
-{
-	printf("Entro");
-	/*Makes callback**/
-	if(gpio_A_callback)
-		gpio_A_callback();
-	/*There is an interrupt**/
-	g_flag_port_A = TRUE;
-	/*Cleans interrupt**/
-	GPIO_clear_interrupt(GPIO_A);
-
-}
-
-void GPIO_clear_irq_status(gpio_port_name_t gpio)
-{
-	/*Cleans flag from interrupt GPIOA**/
-	if(GPIO_A == gpio)
-	{
-		g_intr_status_flag.flag_port_a = FALSE;
-	}
-	else/*Cleans flag from interrupt GPIOC**/
-	{
-		g_intr_status_flag.flag_port_c = FALSE;
-	}
-}
-
-uint8_t GPIO_get_irq_status(gpio_port_name_t gpio)
-{
-	uint8_t status = 0;
-	/*Gets status from flag**/
-	if(GPIO_A == gpio)
-	{
-		status = g_intr_status_flag.flag_port_a;
-	}
-	else
-	{
-		status = g_intr_status_flag.flag_port_c;
-	}
-
-	return(status);
-}
-
-
 
 
 void GPIO_clear_interrupt(gpio_port_name_t port_name)
@@ -136,8 +47,6 @@ void GPIO_clear_interrupt(gpio_port_name_t port_name)
 
 	}// end switch
 }
-
-
 uint8_t GPIO_clock_gating(gpio_port_name_t port_name)
 {
 	switch(port_name)/** Selecting the GPIO for clock enabling*/
@@ -423,3 +332,144 @@ void GPIO_toogle_data(gpio_port_name_t port_name,  uint32_t data)
 				break;
 				} //end switch
 } //end function
+
+void GPIO_callback_init(gpio_port_name_t port_name,void (*handler)(void))
+{
+	switch(port_name)
+	{
+	case GPIO_A:
+		gpio_A_callback = handler;
+		break;
+	case GPIO_B:
+		gpio_B_callback = handler;
+		break;
+	case GPIO_C:
+		gpio_C_callback = handler;
+		break;
+	case GPIO_D:
+		gpio_D_callback = handler;
+		break;
+	case GPIO_E:
+		gpio_E_callback = handler;
+		break;
+	default:
+		break;
+	}
+}
+
+/*ISR*/
+void PORTA_IRQHandler(void)
+{
+	/*Set flag that it was pressed*/
+	g_intr_status_flag.flag_port_a = TRUE;
+	/*Callback if its used*/
+	if(gpio_A_callback)
+	{
+		gpio_A_callback();
+	}
+
+	GPIO_clear_interrupt(GPIO_A);
+}
+
+void PORTB_IRQHandler(void)
+{
+	/*Set flag that it was pressed*/
+	g_intr_status_flag.flag_port_a = TRUE;
+	/*Callback if its used*/
+
+	if(gpio_B_callback)
+	{
+		gpio_B_callback();
+	}
+
+	GPIO_clear_interrupt(GPIO_B);
+}
+
+void PORTC_IRQHandler(void)
+{
+	/*Set flag that it was pressed*/
+	g_intr_status_flag.flag_port_c = TRUE;
+	/*Callback if its used*/
+	if(gpio_C_callback)
+	{
+		gpio_C_callback();
+	}
+
+	GPIO_clear_interrupt(GPIO_C);
+}
+
+void PORTD_IRQHandler(void)
+{
+	/*Set flag that it was pressed*/
+	g_intr_status_flag.flag_port_d = TRUE;
+	/*Callback if its used*/
+	if(gpio_D_callback)
+	{
+		gpio_D_callback();
+	}
+
+	GPIO_clear_interrupt(GPIO_D);
+}
+
+void PORTE_IRQHandler(void)
+{
+	/*Set flag that it was pressed*/
+	g_intr_status_flag.flag_port_e = TRUE;
+	/*Callback if its used*/
+	if(gpio_E_callback)
+	{
+		gpio_E_callback();
+	}
+
+	GPIO_clear_interrupt(GPIO_E);
+}
+
+void GPIO_clear_irq_status(gpio_port_name_t port_name)
+{
+	switch(port_name)
+	{
+	case GPIO_A:
+		g_intr_status_flag.flag_port_a = FALSE;
+		break;
+	case GPIO_B:
+		g_intr_status_flag.flag_port_b = FALSE;
+		break;
+	case GPIO_C:
+		g_intr_status_flag.flag_port_c = FALSE;
+		break;
+	case GPIO_D:
+		g_intr_status_flag.flag_port_d = FALSE;
+		break;
+	case GPIO_E:
+		g_intr_status_flag.flag_port_e = FALSE;
+		break;
+	default:
+		break;
+	}
+}
+
+uint8_t GPIO_get_irq_status(gpio_port_name_t port_name)
+{
+	uint8_t irq_status = FALSE;
+	switch(port_name)
+	{
+	case GPIO_A:
+		irq_status = g_intr_status_flag.flag_port_a;
+		break;
+	case GPIO_B:
+		irq_status = g_intr_status_flag.flag_port_b;
+		break;
+	case GPIO_C:
+		irq_status = g_intr_status_flag.flag_port_c;
+		break;
+	case GPIO_D:
+		irq_status = g_intr_status_flag.flag_port_d;
+		break;
+	case GPIO_E:
+		irq_status = g_intr_status_flag.flag_port_e;
+		break;
+	default:
+		break;
+	}
+	return irq_status;
+}

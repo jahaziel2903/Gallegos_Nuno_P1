@@ -12,13 +12,27 @@
 
 #include "stdint.h"
 #include "MK64F12.h"
+#include "bits.h"
 
+#define MASK_PIT_DISABLE 0x00000000
+
+#define SYSTEM_CLOCK (21000000U)
 
 typedef float My_float_pit_t;
 
 /*! This enumerated constant are used to select the PIT to be used*/
 typedef enum {PIT_0,PIT_1,PIT_2,PIT_3} PIT_timer_t;
 
+typedef struct
+{
+	uint8_t flag_PIT_0 : 1;
+	uint8_t flag_PIT_1 : 1;
+	uint8_t flag_PIT_2 : 1;
+	uint8_t flag_PIT_3 : 1;
+	/**/
+	uint8_t flag_PIT_ISR:1;
+	uint8_t flag_SM    : 1;
+} pit_interrupt_flags_t;
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -47,13 +61,13 @@ void PIT_clock_gating(void);
 
 /********************************************************************************************/
 /*!
- 	 \brief	It return the status of the interrupt flag. This flag is a variable created by the programmer.
+ 	 \brief	It return the status of the interrupt flag of the PIT. This flag is a variable created by the programmer.
  	 It is not the flag related with bit TIF in PIT->CHANNEL[0].TFLG |= PIT_TFLG_TIF_MASK, this flag must be clear in the ISR of the PIT
 
- 	 \param[in]  void.
+ 	 \param[in]  pit_timer channel to be used.
  	 \return uint8_t flag status
  */
-uint8_t PIT_get_interrupt_flag_status(void);
+uint8_t PIT_get_interrupt_flag_status(PIT_timer_t pit_timer);
 
 /********************************************************************************************/
 /*!
@@ -61,7 +75,7 @@ uint8_t PIT_get_interrupt_flag_status(void);
  	 It is not the flag related with bit TIF in PIT->CHANNEL[0].TFLG |= PIT_TFLG_TIF_MASK, this flag must be clear in the ISR of the PIT
 
  	 \param[in]  void.
- 	 \return uint8_t flag status
+ 	 \return 	 void
  */
 void PIT_clear_interrupt_flag(void);
 
@@ -70,32 +84,65 @@ void PIT_clear_interrupt_flag(void);
  	 \brief	It enables the PIT
 
  	 \param[in]  void.
- 	 \return uint8_t flag status
+ 	 \return 	 void
  */
 void PIT_enable(void);
 
 /********************************************************************************************/
 /*!
- 	 \brief	It enable de interrupt capabilities of the PIT
+ 	 \brief	It disables the PIT
 
  	 \param[in]  void.
- 	 \return uint8_t flag status
+ 	 \return 	 void
  */
-void PIT_enable_interrupt(PIT_timer_t pit);
-/********************************************************************************************/
-/********************************************************************************************/
-/********************************************************************************************/
+void PIT_disable(void);
+
 /********************************************************************************************/
 /*!
- 	 \brief	This function assigns handler to Pit_timer
+ 	 \brief	It enables a specific timer of the PIT
 
- 	 \param[in]  void.
+ 	 \param[in]  pit_timer channel to be used.
+ 	 \return 	 void
+ */
+void PIT_timer_enable(PIT_timer_t pit_timer);
+
+/********************************************************************************************/
+/*!
+ 	 \brief	It disables a specific timer of the PIT
+
+ 	 \param[in]  pit_timer channel to be used.
+ 	 \return 	 void
+ */
+void PIT_timer_disable(PIT_timer_t pit_timer);
+
+/********************************************************************************************/
+/*!
+ 	 \brief	It enable the interrupt capabilities of the PIT
+
+ 	 \param[in]  pit_timer channel to be used.
  	 \return uint8_t flag status
  */
+void PIT_enable_interrupt(PIT_timer_t pit_timer);
 
-void PIT_callback_init(PIT_timer_t pit_name,void (*handler)(void));
 /********************************************************************************************/
+/*!
+ 	 \brief	It disable the interrupt capabilities of the PIT
+
+ 	 \param[in]  pit_timer channel to be used.
+ 	 \return uint8_t flag status
+ */
+void PIT_disable_interrupt(PIT_timer_t pit_timer);
+
 /********************************************************************************************/
+/*!
+ 	 \brief It set the pointer to the function that be called from the handler of the interruption.
+
+ 	 \param[in]	 pit_timer channel to be used.
+	 \param[in]  pointer to the function
+ 	 \return void
+ */
+void PIT_callback_init(PIT_timer_t pit_timer,void (*handler)(void));
+
 
 
 

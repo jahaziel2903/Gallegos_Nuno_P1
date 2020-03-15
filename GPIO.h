@@ -1,15 +1,21 @@
-/*
- * GPIO.h
- *
- *  Created on: 22 feb. 2020
- *      Author: usuario
+/**
+	\file
+	\brief
+		This is the source file for the GPIO device driver for Kinetis K64.
+		It contains all the implementation for configuration functions and runtime functions.
+		i.e., this is the application programming interface (API) for the GPIO peripheral.
+	\author J. Luis Pizano Escalante, luispizano@iteso.mx
+	\date	5/09/2018
+	\todo
+	    Interrupts are not implemented in this API implementation.
  */
-
 #ifndef GPIO_H_
 #define GPIO_H_
 
 
 #include "stdint.h"
+
+
 /** Constant that represent the clock enable for GPIO A */
 #define GPIO_CLOCK_GATING_PORTA 0x00000200
 /** Constant that represent the clock enable for GPIO B */
@@ -104,9 +110,9 @@ typedef const uint32_t gpio_pin_control_register_t;
 
 
 
-void GPIO_clear_irq_status(gpio_port_name_t gpio);
+void GPIO_clear_irq_status(gpio_port_name_t port_name);
 
-uint8_t GPIO_get_irq_status(gpio_port_name_t gpio);
+uint8_t GPIO_get_irq_status(gpio_port_name_t port_name);
 
 
 /********************************************************************************************/
@@ -114,6 +120,7 @@ uint8_t GPIO_get_irq_status(gpio_port_name_t gpio);
 /********************************************************************************************/
 /*!
  	 \brief	 This function clears all interrupts that were sensed by the GPIO.
+
  	 \param[in]  port_name Port to clear interrupts.
  	 \return void
  	 \todo Implement a mechanism to clear interrupts by a specific pin.
@@ -128,6 +135,7 @@ void GPIO_clear_interrupt(gpio_port_name_t port_name);
 /*!
  	 \brief	 This function enables the GPIO clock by configuring the corresponding bit
  	 	 and register in the System Clock Gating Control Register.
+
  	 \param[in]  port_name Port to be configured.
  	 \return 1 if the port_name is valid else return 0
  */
@@ -157,6 +165,7 @@ uint8_t GPIO_pin_control_register(gpio_port_name_t port_name, uint8_t pin, gpio_
  	 \param[in] port_name Port to configure
  	 \param[in] direction Input value to specify the port as input or output.
  	 \return void
+
  */
 void GPIO_data_direction_port(gpio_port_name_t port_name, uint32_t direction);
 /********************************************************************************************/
@@ -177,6 +186,7 @@ void GPIO_data_direction_pin(gpio_port_name_t port_name, uint8_t state, uint8_t 
  	 \brief	 This function reads all the GPIO port.
  	 \param[in] port_name Port to be read.
  	 \return  It is the value read from a GPIO. It is a 32-bit value.
+
  */
 uint32_t GPIO_read_port(gpio_port_name_t port_name);
 /********************************************************************************************/
@@ -239,13 +249,15 @@ void GPIO_toogle_pin(gpio_port_name_t port_name, uint8_t pin);
  	 \return void
  */
 void GPIO_toogle_data(gpio_port_name_t port_name, uint32_t data);
+
 /********************************************************************************************/
 /********************************************************************************************/
 /********************************************************************************************/
 /*!
- 	 \brief This function initializes GPIO callbacks
- 	 \param[in] port_name Selected Port.
- 	 \param[in] handler ptr to function
+ 	 \brief It set the pointer to the function that be called from the handler of the interruption.
+
+ 	 \param[in]	 pit_timer channel to be used.
+	 \param[in]  pointer to the function
  	 \return void
  */
 void GPIO_callback_init(gpio_port_name_t port_name,void (*handler)(void));
